@@ -1,0 +1,3 @@
+Python, Pytest, Requests, Playwright, Postman, SoapUI, Docker, OpenShift, GitLab CI, Jenkins, Linux, Git, REST API, Apache
+Kafka, RabbitMQ, WireMock, Allure, Kibana, Graylog, Grafana, Pydantic, Agile, Claude API, ChatGPT, Codex, Cursor, HTML,
+Kimi

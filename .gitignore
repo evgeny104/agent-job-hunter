@@ -1,0 +1,11 @@
+.venv/
+.env
+.env.local
+*.session
+var/
+reports/
+qr_login.png
+__pycache__/
+.idea/
+data/resume/
+AGENTS.md

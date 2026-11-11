@@ -1,0 +1,4 @@
+openai==3.49.0
+Telethon==1.45.0
+python-dotenv==1.2.4
+qrcode[pil]
