@@ -4,7 +4,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from src.telegram_tools import scan_chats
+from tools.telegram_tools import scan_chats
 
 CHAT = "@qa_jobs"  # замени на свой чат: @username или название группы
 

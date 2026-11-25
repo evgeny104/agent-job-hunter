@@ -1,20 +1,17 @@
-import asyncio
-import json
-import os
-import re
-import sys
+"""Инструменты агента: адаптеры над модулями tools/ + реестр TOOLS/TOOLS_SCHEMA.
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+Агент (agent/agent.py) вызывает инструменты по имени, не зная деталей реализации.
+"""
+
+import asyncio
+import re
 
 from config.settings import KEYWORDS_FILE
-from src.llm import client, MODEL
-from src.telegram_tools import scan_chats, load_chat_names, send_to_saved
-from src.resume_tools import load_resume, match_vacancy
-from src.letter_tools import load_template, adapt_letter
-from src.report_tools import save_report, build_summary
-from src.state import load_processed, mark_processed
-
-MAX_ITERATIONS = 20  # защита от бесконечного цикла
+from tools.state import load_processed, mark_processed
+from tools.telegram_tools import scan_chats, load_chat_names, send_to_saved
+from tools.resume_tools import load_resume, match_vacancy
+from tools.letter_tools import load_template, adapt_letter
+from tools.report_tools import save_report, build_summary
 
 # --- Кэш данных кандидата (грузим лениво, один раз) ---
 _resume_cache = None
@@ -36,7 +33,7 @@ def _keywords() -> list[str]:
     return _keywords_cache
 
 
-# --- Инструменты агента ---
+# --- Инструменты ---
 
 def tool_scan_chats(limit: int = 20) -> list[dict]:
     """Сканирует чаты из TG_CHATS (.env), отдаёт новые вакансии кандидата."""
@@ -180,74 +177,3 @@ TOOLS_SCHEMA = [
         },
     },
 ]
-
-SYSTEM_PROMPT = """Ты — агент job-hunter, помощник кандидата в поиске работы.
-
-Твоя задача: находить подходящие вакансии в Telegram-чатах и готовить к ним сопроводительные письма.
-
-Как работать:
-1. scan_chats — получи новые вакансии из чатов.
-2. Для каждой вакансии вызови match_vacancy.
-3. Если score >= 60 (relevant=true) — вызови adapt_letter для этой вакансии.
-4. Когда всё обработано: save_report со всеми вакансиями (с письмами для релевантных).
-5. send_summary со списком РЕЛЕВАНТНЫХ вакансий (score, ссылка, стек).
-6. Дай пользователю короткий итог на русском: сколько вакансий найдено, сколько подходящих, куда сохранён отчёт.
-
-Если scan_chats вернул пустой список — сообщи, что новых вакансий нет, и не вызывай остальные инструменты.
-Если инструмент вернул {"error": ...} — сообщи об ошибке пользователю."""
-
-
-def run_agent(user_message: str) -> str:
-    messages = [
-        {"role": "system", "content": SYSTEM_PROMPT},
-        {"role": "user", "content": user_message},
-    ]
-
-    for _ in range(MAX_ITERATIONS):
-        response = client.chat.completions.create(
-            model=MODEL,
-            messages=messages,
-            tools=TOOLS_SCHEMA,
-        )
-        msg = response.choices[0].message
-
-        if msg.tool_calls:
-            messages.append(msg)
-            for call in msg.tool_calls:
-                fn_name = call.function.name
-                args = json.loads(call.function.arguments or "{}")
-                print(f"  -> {fn_name}({json.dumps(args, ensure_ascii=False)[:120]})", flush=True)
-                try:
-                    result = TOOLS[fn_name](**args)
-                except Exception as e:
-                    result = {"error": f"{type(e).__name__}: {e}"}
-                messages.append({
-                    "role": "tool",
-                    "tool_call_id": call.id,
-                    "content": json.dumps(result, ensure_ascii=False, default=str),
-                })
-        else:
-            return msg.content
-
-    return "Достигнут лимит итераций — прервано. Попробуйте уточнить задачу."
-
-
-def main():
-    # консоль Windows (cp1251) не выводит эмодзи из текста вакансий
-    sys.stdout.reconfigure(errors="replace")
-    sys.stderr.reconfigure(errors="replace")
-    print("Job-hunter агент. Команды: «проверь чаты», «оцени вакансию: <текст>». Выход: exit")
-    while True:
-        try:
-            user = input("\nВы: ").strip()
-        except (EOFError, KeyboardInterrupt):
-            break
-        if not user:
-            continue
-        if user.lower() in ("exit", "выход", "quit"):
-            break
-        print("\nАгент:", run_agent(user), flush=True)
-
-
-if __name__ == "__main__":
-    main()

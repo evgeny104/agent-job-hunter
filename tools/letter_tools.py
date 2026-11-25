@@ -1,5 +1,5 @@
 from config.settings import COVER_LETTER_FILE
-from src.llm import client, MODEL
+from agent.llm import client, MODEL
 
 
 def load_template(path=COVER_LETTER_FILE) -> str:

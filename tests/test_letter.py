@@ -3,8 +3,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from src.resume_tools import load_resume
-from src.letter_tools import load_template, adapt_letter
+from tools.resume_tools import load_resume
+from tools.letter_tools import load_template, adapt_letter
 
 VACANCY = """#вакансия
 Ищем Middle AQA (Python) в финтех-проект.

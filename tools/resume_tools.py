@@ -1,6 +1,6 @@
 import json
 from config.settings import RESUME_FILE
-from src.llm import client, MODEL
+from agent.llm import client, MODEL
 
 
 def load_resume() -> str:

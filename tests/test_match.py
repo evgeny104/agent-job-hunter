@@ -6,9 +6,9 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from config.settings import KEYWORDS_FILE, PROCESSED_TEST_FILE
-from src.telegram_tools import scan_chats
-from src.resume_tools import load_resume, match_vacancy
-from src.state import load_processed, mark_processed
+from tools.telegram_tools import scan_chats
+from tools.resume_tools import load_resume, match_vacancy
+from tools.state import load_processed, mark_processed
 
 CHAT = "@qa_jobs"  # замени на реальный чат: @username или название группы
 
