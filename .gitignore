@@ -8,4 +8,5 @@ qr_login.png
 __pycache__/
 .idea/
 data/resume/
+data/cover_letter_template.txt
 AGENTS.md

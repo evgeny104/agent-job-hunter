@@ -9,9 +9,6 @@ from config.settings import KEYWORDS_FILE, PROCESSED_TEST_FILE
 from src.telegram_tools import scan_chats
 from src.resume_tools import load_resume, match_vacancy
 from src.state import load_processed, mark_processed
-import src.state as state
-
-state.STATE_FILE = PROCESSED_TEST_FILE  # тестовая память, не трогает боевую
 
 CHAT = "@qa_jobs"  # замени на реальный чат: @username или название группы
 
@@ -25,7 +22,7 @@ def load_keywords() -> list[str]:
 async def main():
     resume = load_resume()
     keywords = load_keywords()
-    processed = load_processed()
+    processed = load_processed(PROCESSED_TEST_FILE)  # тестовая память, не трогает боевую
     print(f"Ключевых слов: {len(keywords)}, в памяти: {len(processed)} сообщений", flush=True)
 
     msgs = await scan_chats(chat_names=[CHAT], limit=2)
@@ -59,7 +56,7 @@ async def main():
         except Exception as e:
             print(f"  !!! Ошибка модели: {type(e).__name__}: {e}", flush=True)
 
-    mark_processed(seen_ids)  # запоминаем всё увиденное
+    mark_processed(seen_ids, PROCESSED_TEST_FILE)  # запоминаем всё увиденное
     print("\nГотово. Память обновлена.", flush=True)
 
 
