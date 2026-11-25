@@ -1,15 +1,5 @@
-import os
-from dotenv import load_dotenv
-from openai import OpenAI
 from config.settings import COVER_LETTER_FILE
-
-load_dotenv()
-
-client = OpenAI(
-    api_key=os.getenv("KIMI_API_KEY"),
-    base_url=os.getenv("KIMI_BASE_URL"),
-)
-MODEL = os.getenv("KIMI_MODEL")
+from src.llm import client, MODEL
 
 
 def load_template(path=COVER_LETTER_FILE) -> str:

@@ -3,25 +3,17 @@ import json
 import os
 import re
 import sys
-from dotenv import load_dotenv
-from openai import OpenAI
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from config.settings import KEYWORDS_FILE
+from src.llm import client, MODEL
 from src.telegram_tools import scan_chats, load_chat_names, send_to_saved
 from src.resume_tools import load_resume, match_vacancy
 from src.letter_tools import load_template, adapt_letter
 from src.report_tools import save_report, build_summary
 from src.state import load_processed, mark_processed
 
-load_dotenv()
-
-client = OpenAI(
-    api_key=os.getenv("KIMI_API_KEY"),
-    base_url=os.getenv("KIMI_BASE_URL"),
-)
-MODEL = os.getenv("KIMI_MODEL")
 MAX_ITERATIONS = 20  # защита от бесконечного цикла
 
 # --- Кэш данных кандидата (грузим лениво, один раз) ---
